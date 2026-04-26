@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Quest: Had to vs Could</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/fontsource-poppins@4.0.0/index.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .chat-bubble {
+            position: relative;
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        .chat-pops {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border-bottom-left-radius: 2px;
+            align-self: flex-start;
+        }
+        .chat-me {
+            background-color: #fbcfe8;
+            color: #be185d;
+            border-bottom-right-radius: 2px;
+            align-self: flex-end;
+            margin-left: auto; /* keep aligned right */
+        }
+        /* Fixed error bubble: preserves right alignment */
+        .chat-me-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-bottom-right-radius: 2px;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        .pop {
+            animation: pop 0.3s;
+        }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .hidden-screen {
+            display: none;
+        }
+        .visible-screen {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Main Game Container -->
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden relative h-[850px] flex flex-col">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-pink-500 to-purple-600 p-4 text-white flex justify-between items-center z-10 shadow-md">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">❤️</span>
+                <span id="score-display" class="font-bold text-lg">0</span>
+                <span class="text-sm opacity-80">Likes</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-medium bg-white/20 px-3 py-1 rounded-full" id="level-indicator">Level 1</span>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-200 h-2">
+            <div id="progress-bar" class="bg-pink-500 h-2 transition-all duration-500" style="width: 0%"></div>
+        </div>
+
+        <!-- Game Screens Container -->
+        <div class="flex-1 overflow-y-auto relative bg-gray-50">
+            
+            <!-- Intro Screen -->
+            <div id="screen-intro" class="visible-screen flex-col items-center justify-center p-6 text-center h-full bg-gradient-to-b from-purple-100 to-white">
+                <div class="w-32 h-32 mb-4 rounded-full overflow-hidden border-4 border-purple-300 shadow-lg bg-white flex items-center justify-center">
+                    <!-- Cartoon old explorer in a hat – works fine -->
+                    <img src="https://cdn-icons-png.flaticon.com/512/10226/10226531.png" alt="Old Explorer" class="w-full h-full object-cover p-2">
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Grammar Quest</h1>
+                <p class="text-gray-600 mb-6">Explore the Amazon with Pops and fix your grammar!</p>
+                <div class="space-y-2 mb-8 text-left bg-white p-4 rounded-xl shadow-sm border border-gray-100 w-full">
+                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <span class="bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded text-xs font-bold">LVL 1</span>
+                        <span>Amazon Survival (Match words)</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <span class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded text-xs font-bold">LVL 2</span>
+                        <span>The Interview (Chat with Pops)</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <span class="bg-red-100 text-red-600 px-2 py-0.5 rounded text-xs font-bold">LVL 3</span>
+                        <span>Boss Battle (Fix the errors)</span>
+                    </div>
+                </div>
+                <button onclick="startGame()" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-4 rounded-xl shadow-lg hover:opacity-90 transition transform active:scale-95 text-lg">
+                    Start Adventure! 
+                </button>
+            </div>
+
+            <!-- Level 1: Drag and Drop / Match -->
+            <div id="screen-level1" class="hidden-screen flex-col p-4 h-full">
+                <h2 class="text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                    <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-lg">LVL 1</span>
+                    Amazon Survival
+                </h2>
+                <p class="text-sm text-gray-500 mb-4">Drag the correct words to complete the story!</p>
+                
+                <div class="space-y-4 mb-6">
+                    <div class="bg-white p-3 rounded-xl shadow-sm border-2 border-transparent transition-colors" id="l1-zone-1">
+                        <p class="text-gray-700 text-sm">Pops: "When I was young, I <span class="font-bold text-pink-500 underline decoration-dotted">______</span> use a canoe to travel."</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-sm border-2 border-transparent transition-colors" id="l1-zone-2">
+                        <p class="text-gray-700 text-sm">Pops: "I <span class="font-bold text-pink-500 underline decoration-dotted">______</span> speak the tribe's language."</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-sm border-2 border-transparent transition-colors" id="l1-zone-3">
+                        <p class="text-gray-700 text-sm">You: "Today, I <span class="font-bold text-purple-500 underline decoration-dotted">______</span> use a translate app."</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3" id="l1-options">
+                    <button onclick="selectWord(this)" class="word-card bg-white p-3 rounded-xl shadow border-2 border-gray-100 font-bold text-gray-600 text-center" data-word="had to">had to</button>
+                    <button onclick="selectWord(this)" class="word-card bg-white p-3 rounded-xl shadow border-2 border-gray-100 font-bold text-gray-600 text-center" data-word="couldn't">couldn't</button>
+                    <button onclick="selectWord(this)" class="word-card bg-white p-3 rounded-xl shadow border-2 border-gray-100 font-bold text-gray-600 text-center" data-word="could">could</button>
+                    <button onclick="selectWord(this)" class="word-card bg-white p-3 rounded-xl shadow border-2 border-gray-100 font-bold text-gray-600 text-center" data-word="didn't have to">didn't have to</button>
+                </div>
+            </div>
+
+            <!-- Level 2: Chat -->
+            <div id="screen-level2" class="hidden-screen flex-col h-full">
+                <div class="p-4 bg-white border-b border-gray-100 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-xl"></div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">Pops</h3>
+                        <p class="text-xs text-green-500">Online</p>
+                    </div>
+                </div>
+                
+                <div class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50" id="chat-container">
+                </div>
+
+                <div class="p-4 bg-white border-t border-gray-100" id="chat-options-container">
+                </div>
+            </div>
+
+            <!-- Level 3: Error Correction -->
+            <div id="screen-level3" class="hidden-screen flex-col items-center justify-center p-6 h-full">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-lg">BOSS BATTLE</span>
+                    Fix the Grammar!
+                </h2>
+
+                <div class="bg-white w-full p-6 rounded-2xl shadow-lg border-2 border-red-100 mb-6 relative">
+                    <div class="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">ERROR!</div>
+                    <p class="text-lg text-gray-700 leading-relaxed" id="l3-sentence">
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 w-full" id="l3-options">
+                </div>
+            </div>
+
+            <!-- Win Screen -->
+            <div id="screen-win" class="hidden-screen flex-col items-center justify-center p-6 text-center h-full bg-gradient-to-b from-yellow-100 to-white">
+                <div class="text-6xl mb-4"></div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Awesome Job!</h2>
+                <p class="text-gray-600 mb-6">You mastered <span class="font-bold text-pink-500">had to</span> and <span class="font-bold text-purple-500">could</span>!</p>
+                <div class="bg-white p-4 rounded-xl shadow mb-6 w-full">
+                    <p class="text-sm text-gray-500">Total Likes</p>
+                    <p class="text-4xl font-bold text-pink-500" id="final-score">0</p>
+                </div>
+                <button onclick="location.reload()" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 rounded-xl shadow-lg hover:opacity-90 transition">
+                    Play Again 🔄
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Game State
+        const state = {
+            score: 0,
+            level: 1,
+            progress: 0,
+            l1: { selectedWord: null, completed: 0, total: 3 },
+            l2: { currentQ: 0, total: 3 },
+            l3: { currentQ: 0, total: 3 }
+        };
+
+        // Data
+        const l1Data = [
+            { zone: 'l1-zone-1', answer: 'had to' },
+            { zone: 'l1-zone-2', answer: "couldn't" },
+            { zone: 'l1-zone-3', answer: 'could' }
+        ];
+
+        const l2Data = [
+            {
+                pops: "Did you have to get up early last weekend?",
+                correct: "No, I didn't. I slept late!",
+                wrong: ["No, I couldn't.", "Yes, I could."],
+                feedback: "Remember: The short answer is 'No, I didn't.' 'didn't have to' is the full form."
+            },
+            {
+                pops: "Could you speak French when you were 10?",
+                correct: "No, I couldn't. But now I can!",
+                wrong: ["No, I didn't.", "Yes, I could to."],
+                feedback: "'Could' is for ability. We don't use 'to' after 'could'."
+            },
+            {
+                pops: "Did you have to wear a uniform at your old school?",
+                correct: "Yes, I did. It was boring!",
+                wrong: ["Yes, I could.", "Yes, I had to."],
+                feedback: "Full sentence: 'I had to'. Short answer: 'Yes, I did'."
+            }
+        ];
+
+        const l3Data = [
+            {
+                sentence: "When Pops was young, he <span class='text-red-500 font-bold line-through decoration-2'>can</span> use a phone.",
+                options: ["couldn't", "had to", "didn't have to"],
+                correctIndex: 0
+            },
+            {
+                sentence: "We <span class='text-red-500 font-bold line-through decoration-2'>didn't had to</span> use a map because we had a GPS.",
+                options: ["didn't have to", "couldn't", "could"],
+                correctIndex: 0
+            },
+            {
+                sentence: "I <span class='text-red-500 font-bold line-through decoration-2'>could to</span> read a map very well.",
+                options: ["could", "had to", "was able"],
+                correctIndex: 0
+            }
+        ];
+
+        // UI Elements
+        const scoreDisplay = document.getElementById('score-display');
+        const progressBar = document.getElementById('progress-bar');
+        const levelIndicator = document.getElementById('level-indicator');
+
+        // Functions
+        function updateScore(points) {
+            state.score += points;
+            scoreDisplay.innerText = state.score;
+            scoreDisplay.classList.add('pop');
+            setTimeout(() => scoreDisplay.classList.remove('pop'), 300);
+            updateProgress(); // Fixed: update progress bar on every score
+        }
+
+        function updateProgress() {
+            const totalSteps = state.l1.total + state.l2.total + state.l3.total;
+            let currentSteps = 0;
+
+            if (state.level === 1) {
+                currentSteps = state.l1.completed;
+            } else if (state.level === 2) {
+                currentSteps = state.l1.total + state.l2.currentQ;
+            } else if (state.level === 3) {
+                currentSteps = state.l1.total + state.l2.total + state.l3.currentQ;
+            } else {
+                currentSteps = totalSteps; // win screen
+            }
+            
+            const pct = (currentSteps / totalSteps) * 100;
+            progressBar.style.width = pct + '%';
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('[id^="screen-"]').forEach(el => {
+                el.classList.add('hidden-screen');
+                el.classList.remove('visible-screen');
+            });
+            const target = document.getElementById(id);
+            target.classList.remove('hidden-screen');
+            target.classList.add('visible-screen');
+        }
+
+        function startGame() {
+            showScreen('screen-level1');
+            initLevel1();
+        }
+
+        // Level 1 Logic
+        function initLevel1() {
+            state.level = 1;
+            levelIndicator.innerText = 'Level 1';
+            state.l1.completed = 0;
+            document.querySelectorAll('.word-card').forEach(btn => {
+                btn.classList.remove('opacity-50', 'cursor-not-allowed', 'ring-2', 'ring-pink-500');
+                btn.disabled = false;
+            });
+            document.querySelectorAll('[id^="l1-zone-"]').forEach(zone => {
+                zone.classList.remove('border-green-500', 'bg-green-50');
+                zone.querySelector('span').innerText = '______';
+                zone.querySelector('span').classList.add('underline', 'decoration-dotted');
+            });
+            updateProgress();
+        }
+
+        function selectWord(btn) {
+            if (btn.disabled) return;
+            document.querySelectorAll('.word-card').forEach(b => b.classList.remove('ring-2', 'ring-pink-500'));
+            btn.classList.add('ring-2', 'ring-pink-500');
+            state.l1.selectedWord = btn.dataset.word;
+            state.l1.selectedBtn = btn;
+        }
+
+        document.querySelectorAll('[id^="l1-zone-"]').forEach(zone => {
+            zone.addEventListener('click', () => {
+                if (!state.l1.selectedWord) return;
+                const zoneId = zone.id;
+                const data = l1Data.find(d => d.zone === zoneId);
+                
+                if (data.answer === state.l1.selectedWord) {
+                    zone.querySelector('span').innerText = state.l1.selectedWord;
+                    zone.querySelector('span').classList.remove('text-pink-500', 'underline', 'decoration-dotted');
+                    zone.classList.add('border-green-500', 'bg-green-50');
+                    state.l1.selectedBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    state.l1.selectedBtn.disabled = true;
+                    state.l1.completed++;
+                    updateScore(10);
+                    state.l1.selectedWord = null;
+                    
+                    if (state.l1.completed === state.l1.total) {
+                        setTimeout(() => {
+                            state.level = 2;
+                            levelIndicator.innerText = "Level 2";
+                            showScreen('screen-level2');
+                            initLevel2();
+                        }, 800);
+                    }
+                } else {
+                    zone.classList.add('shake');
+                    setTimeout(() => zone.classList.remove('shake'), 500);
+                }
+            });
+        });
+
+        // Level 2 Logic
+        function initLevel2() {
+            state.level = 2;
+            state.l2.currentQ = 0;
+            document.getElementById('chat-container').innerHTML = '';
+            loadChatQuestion();
+            updateProgress();
+        }
+
+        function loadChatQuestion() {
+            if (state.l2.currentQ >= l2Data.length) {
+                state.level = 3;
+                levelIndicator.innerText = "Level 3";
+                showScreen('screen-level3');
+                initLevel3();
+                return;
+            }
+
+            const q = l2Data[state.l2.currentQ];
+            const chatContainer = document.getElementById('chat-container');
+            const optionsContainer = document.getElementById('chat-options-container');
+
+            const popsMsg = document.createElement('div');
+            popsMsg.className = 'chat-bubble chat-pops';
+            popsMsg.innerHTML = `<p class="font-bold text-xs mb-1">Pops</p>${q.pops}`;
+            chatContainer.appendChild(popsMsg);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            optionsContainer.innerHTML = '';
+            const allOptions = [q.correct, ...q.wrong];
+            allOptions.sort(() => Math.random() - 0.5);
+
+            allOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-3 mb-2 bg-white border-2 border-gray-200 rounded-xl hover:border-pink-300 transition text-sm font-medium text-gray-700';
+                btn.innerText = opt;
+                btn.onclick = () => handleChatAnswer(opt, q.correct, q.feedback);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleChatAnswer(selected, correct, feedback) {
+            const chatContainer = document.getElementById('chat-container');
+            const optionsContainer = document.getElementById('chat-options-container');
+            optionsContainer.innerHTML = ''; 
+
+            const meMsg = document.createElement('div');
+            
+            if (selected === correct) {
+                meMsg.className = 'chat-bubble chat-me bg-green-100 text-green-700 border border-green-200';
+                updateScore(15);
+            } else {
+                // Fixed: keep right alignment with dedicated error class
+                meMsg.className = 'chat-bubble chat-me-error';
+                
+                const feedbackMsg = document.createElement('div');
+                feedbackMsg.className = 'chat-bubble bg-gray-100 text-gray-600 text-xs border border-gray-200';
+                feedbackMsg.innerText = `💡 Tip: ${feedback}`;
+                chatContainer.appendChild(feedbackMsg);
+            }
+
+            meMsg.innerHTML = `<p class="font-bold text-xs mb-1 text-right text-pink-400">You</p>${selected}`;
+            chatContainer.appendChild(meMsg);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            setTimeout(() => {
+                state.l2.currentQ++;
+                loadChatQuestion();
+            }, 1500);
+        }
+
+        // Level 3 Logic
+        function initLevel3() {
+            state.level = 3;
+            state.l3.currentQ = 0;
+            loadL3Question();
+            updateProgress();
+        }
+
+        function loadL3Question() {
+            if (state.l3.currentQ >= l3Data.length) {
+                showWinScreen();
+                return;
+            }
+
+            const q = l3Data[state.l3.currentQ];
+            document.getElementById('l3-sentence').innerHTML = q.sentence;
+            
+            const optsContainer = document.getElementById('l3-options');
+            optsContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'bg-white p-4 rounded-xl shadow border-2 border-gray-100 font-bold text-gray-600 hover:bg-gray-50 transition';
+                btn.innerText = opt;
+                btn.onclick = () => checkL3Answer(idx, q.correctIndex);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function checkL3Answer(selectedIdx, correctIdx) {
+            const optsContainer = document.getElementById('l3-options');
+            const buttons = optsContainer.querySelectorAll('button');
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (selectedIdx === correctIdx) {
+                buttons[selectedIdx].classList.add('bg-green-500', 'text-white', 'border-green-500');
+                updateScore(20);
+            } else {
+                buttons[selectedIdx].classList.add('bg-red-500', 'text-white', 'border-red-500');
+                buttons[correctIdx].classList.add('bg-green-500', 'text-white', 'border-green-500');
+            }
+
+            setTimeout(() => {
+                state.l3.currentQ++;
+                loadL3Question();
+            }, 1000);
+        }
+
+        function showWinScreen() {
+            showScreen('screen-win');
+            document.getElementById('final-score').innerText = state.score;
+            progressBar.style.width = '100%';
+        }
+
+        // Initial progress
+        updateProgress();
+    </script>
+</body>
+</html>
