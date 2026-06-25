@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grammar Quest: Had to vs Could</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/fontsource-poppins@4.0.0/index.css" rel="stylesheet">
     <style>
@@ -37,9 +38,8 @@
             color: #be185d;
             border-bottom-right-radius: 2px;
             align-self: flex-end;
-            margin-left: auto; /* keep aligned right */
+            margin-left: auto;
         }
-        /* Fixed error bubble: preserves right alignment */
         .chat-me-error {
             background-color: #fee2e2;
             color: #991b1b;
@@ -80,10 +80,13 @@
         
         <!-- Header -->
         <div class="bg-gradient-to-r from-pink-500 to-purple-600 p-4 text-white flex justify-between items-center z-10 shadow-md">
-            <div class="flex items-center gap-2">
-                <span class="text-2xl">❤️</span>
-                <span id="score-display" class="font-bold text-lg">0</span>
-                <span class="text-sm opacity-80">Likes</span>
+            <div class="flex items-center gap-3">
+                <img src="logo.png" alt="Logo" class="h-10 w-auto rounded-lg">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">❤️</span>
+                    <span id="score-display" class="font-bold text-lg">0</span>
+                    <span class="text-sm opacity-80">Likes</span>
+                </div>
             </div>
             <div class="flex items-center gap-2">
                 <span class="text-sm font-medium bg-white/20 px-3 py-1 rounded-full" id="level-indicator">Level 1</span>
@@ -297,7 +300,7 @@
             scoreDisplay.innerText = state.score;
             scoreDisplay.classList.add('pop');
             setTimeout(() => scoreDisplay.classList.remove('pop'), 300);
-            updateProgress(); // Fixed: update progress bar on every score
+            updateProgress();
         }
 
         function updateProgress() {
@@ -311,7 +314,7 @@
             } else if (state.level === 3) {
                 currentSteps = state.l1.total + state.l2.total + state.l3.currentQ;
             } else {
-                currentSteps = totalSteps; // win screen
+                currentSteps = totalSteps;
             }
             
             const pct = (currentSteps / totalSteps) * 100;
@@ -441,7 +444,6 @@
                 meMsg.className = 'chat-bubble chat-me bg-green-100 text-green-700 border border-green-200';
                 updateScore(15);
             } else {
-                // Fixed: keep right alignment with dedicated error class
                 meMsg.className = 'chat-bubble chat-me-error';
                 
                 const feedbackMsg = document.createElement('div');
